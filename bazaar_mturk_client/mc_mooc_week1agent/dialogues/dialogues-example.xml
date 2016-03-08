@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dialogs>
+
+    
+    <dialog concept="goals" scenario="scenario-donothing.xml" description="what goals you might have for your participation in this course" poke_message="What are the things you had in mind to learn from this course?">
+    	
+        <intro>
+In week 1, we started to lay a foundation for the material in this course.  We are just scratching the surface so far.  As we’re working towards getting into more substantive content going forward, it would be great to hear what specific goals you have for what you want to learn in this course.  Can you tell me a little about that?
+        </intro>
+    </dialog>
+    <dialog concept="scope of course content" scenario="scenario-donothing.xml" description="how well the course content matches expectations" poke_message="Does the content so far match your expectations?  What if anything surprised you?">
+    	
+        <intro>
+In any course, a major challenge it to target the material at a level and with a focus that is just right for the variety of students who come.  Based on your experience so far this week, how would you rate the match between what the course offers and what you wanted and expected from it?
+        </intro>
+    </dialog>
+    <dialog concept="expectations going forward" scenario="scenario-donothing.xml" description="what expectations you have for the remainder of the course" poke_message="What expectations do you have going forward?">
+    	
+        <intro>
+Our goal is to do our best to guide you through this course to get the maximum benefit it has to offer.  It would be helpful to us to hear specifically what your expectations are going forward so we can better offer guidance along the way.  Any comments or feedback for us?
+        </intro>
+    </dialog>
+                          
+    <dialog concept="FINISH" scenario="scenario-donothing.xml" description="">
+    	
+        <intro>
+And now we’re done. Thanks for joining us, have a great day! I will now continue the chat activity again starting from the first prompt for those who missed the initial prompts.
+        </intro>
+    </dialog>   
+</dialogs>

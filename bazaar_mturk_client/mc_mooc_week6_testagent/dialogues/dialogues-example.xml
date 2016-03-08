@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dialogs>
+
+    
+    <dialog concept="selective optimization of side activities" scenario="scenario-donothing.xml" description="using existing drugs to discovery new drugs" poke_message="What properties of existing drugs makes them very attractive as starting points for discovering new drugs?" >
+    	
+        <intro>
+Leads from a SOSA program are no more active than other types of leads.  Discuss why advocates of the SOSA approach feel that SOSA-based leads are especially promising for drug discovery?
+        </intro>
+    </dialog>
+    <dialog concept="natural products" scenario="scenario-donothing.xml" description="strengths of natural products for drug discovery" poke_message="Where do both the substrate and a competitive inhibitor bind an enzyme?">
+    	
+        <intro>
+Discuss why knowing the substrate of an enzyme is helpful for the design of a competitive inhibitor of the same enzyme.
+        </intro>
+    </dialog>
+    
+                          
+    <dialog concept="FINISH" scenario="scenario-donothing.xml" description="">
+    	
+        <intro>
+And now we’re done. Thanks for joining us, have a great day! I will now continue the chat activity again starting from the first prompt for those who missed the initial prompts.
+        </intro>
+    </dialog>   
+</dialogs>

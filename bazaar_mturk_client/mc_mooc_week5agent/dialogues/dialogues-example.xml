@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dialogs>
+
+    
+    <dialog concept="drug-target binding" scenario="scenario-donothing.xml" description="the energy that holds a drug to its target" poke_message="What type of intermolecular forces hold a drug to a target?  Which force is the strongest?" >
+    	
+        <intro>
+The energy that holds a drug to its target is often approximately 11 kcal/mol.  What interactions make up the source of this binding energy?
+        </intro>
+    </dialog>
+    <dialog concept="the flexibility of drugs" scenario="scenario-donothing.xml" description="drugs tend to have a rigid shape" poke_message="How can restricting a molecule’s conformation with rings or double bonds improve the binding of a drug to its target?">
+    	
+        <intro>
+Despite potentially being fairly large molecules, drugs normally have a well-defined shape. Discuss how the particular shape of a molecule is relevant to the drug’s binding to a target.
+        </intro>
+    </dialog>
+    <dialog concept="drug space" scenario="scenario-donothing.xml" description="the challenge in sampling drug space" poke_message="What are the traits of a well-designed chemical library?  Which traits are achieved easily through combinatorial chemistry and which are more difficult?" >
+    	
+        <intro>
+The number of molecules that could possibly be considered as oral drug molecules is difficult to comprehend.  A challenge for chemistry is to generate libraries of molecules that sample drug space as a starting point for drug discovery.  Comment on how combinatorial chemistry helps to achieve this goal and yet also has limited success in this area.
+        </intro>
+    </dialog>
+                          
+    <dialog concept="FINISH" scenario="scenario-donothing.xml" description="">
+    	
+        <intro>
+And now we’re done. Thanks for joining us, have a great day! I will now continue the chat activity again starting from the first prompt for those who missed the initial prompts.
+        </intro>
+    </dialog>   
+</dialogs>

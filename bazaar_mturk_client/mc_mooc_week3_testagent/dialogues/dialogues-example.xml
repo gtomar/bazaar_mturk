@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dialogs>
+
+    
+    <dialog concept="clearance" scenario="scenario-donothing.xml" description="factors that cause organs to clear drugs" poke_message="What two variables determine an organ’s clearance, and which prevents the lungs from clearing most drugs from the blood stream?" >
+    	
+        <intro>
+The rate of blood flow through the liver and kidneys of a 70-kg patient is very high at 66 L/h and 99 L/h.  The high rate of blood flow explains the important role of these organs on drug clearance.  The blood flow rate through the lung is much higher at 314 L/h.  Why do you think the lungs, despite their high blood flow, do not normally factor into drug clearance?
+        </intro>
+    </dialog>
+    <dialog concept="volume of distribution" scenario="scenario-donothing.xml" description="a drug’s apparent volume of distribution is a hypothetical value that allows one to understand the properties of a drug" poke_message="If a drug has a high value for its volume of distribution, where is that drug likely located (or not located) in the body?">
+    	
+        <intro>
+The apparent volume of distribution of a drug can have values of over 1.0 L/kg.  At this value, the apparent volume of distribution exceeds the actual volume of the human body.  Explain how this is possible and what higher values indicate about a drug?
+        </intro>
+    </dialog>
+    <dialog concept="oral drugs and the therapeutic window" scenario="scenario-donothing.xml" description="maintaining therapeutic levels of an oral drug is a key challenge for drug discovery" poke_message="How might the size and frequency of the dose be adjusted to ensure a safe and effective dosing regimen?" image_url="http://erebor.lti.cs.cmu.edu/bazaar/week3_image.png">
+    	
+        <intro>
+A Cp-time graph for an oral drug is shown below.  The concentration values exceed the therapeutic window of the drug.  How might the dosing of the drug be adjusted so that the concentrations might fall within the therapeutic window?
+        </intro>
+    </dialog>
+                          
+    <dialog concept="FINISH" scenario="scenario-donothing.xml" description="">
+    	
+        <intro>
+And now we’re done. Thanks for joining us, have a great day! I will now continue the chat activity again starting from the first prompt for those who missed the initial prompts.
+        </intro>
+    </dialog>   
+</dialogs>

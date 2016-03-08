@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dialogs>
+
+    
+    <dialog concept="phase I and II metabolism together" scenario="scenario-donothing.xml" description="how phase I and II reactions cooperate in drug clearance" poke_message="How do phase I and II transformations help the kidneys to clear drugs from the body?" >
+    	
+        <intro>
+Phase I and phase II metabolic reactions often work together to assist in the removal of xenobiotics from the body.  Explain how these reactions cooperate to remove drugs from the bloodstream.
+        </intro>
+    </dialog>
+    <dialog concept="risk of liver damage" scenario="scenario-donothing.xml" description="drug metabolites can damage the liver" poke_message="How is the liver protected from damage and how is that protection potentially reduced by metabolites?">
+    	
+        <intro>
+The liver is a primary organ for drug metabolism.  In cases of drug overdoses, the liver is often at risk to be damaged by drug metabolites.  Discuss in general terms how the liver can be vulnerable to the metabolites that it makes.
+        </intro>
+    </dialog>
+    <dialog concept="population effects" scenario="scenario-donothing.xml" description="genetic differences make safe drug dosing more difficult" poke_message="Why do differences in CYP enzyme activity cause one patient’s drug levels differ from another?  How do these differences challenge the therapeutic window of a drug?" >
+    	
+        <intro>
+A drug is dosed so that its concentration in the body remains above the minimum effective concentration and below the maximum tolerated dose.  Drugs with a narrow therapeutic window require very careful dosing.  Discuss how genetic variations among people makes the design of safe and effective drugs with a narrow window particularly challenging.
+        </intro>
+    </dialog>
+                          
+    <dialog concept="FINISH" scenario="scenario-donothing.xml" description="">
+    	
+        <intro>
+And now we’re done. Thanks for joining us, have a great day! I will now continue the chat activity again starting from the first prompt for those who missed the initial prompts.
+        </intro>
+    </dialog>   
+</dialogs>

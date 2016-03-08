@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plan name="boiling points">
+	<!-- "timeout" for a stage is an absolute number of seconds that elapses 
+	(from the script's beginning) before that stage starts.  -->
+	<!-- "delay" for a stage is the number seconds that elapses in-between stages.  -->
+
+    <stage name="initiate" type="other" delay="10">
+        <step type="prompt" delay="480">Use this space to discuss the relative merits and demerits of each of your assigned energy sources and come to a consensus
+about which plan you think is the best. Wherever possible, supplement plan suggestions, agreements and disagreements with reasons for the same. Virtual Carolyn agent will support you in this endeavor.</step>
+		<step type="prompt" delay="100">Thank you for participating in the discussion, you have 3 minutes to come to a consensus about a plan and complete your proposal. You will then take a final quiz.</step>        
+        <step type="logout" delay="10">LOG_OUT</step>
+    </stage>
+</plan>
