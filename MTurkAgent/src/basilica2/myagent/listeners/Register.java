@@ -98,7 +98,7 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
     
 	public ArrayList<Topic> topicList;	
 	public ArrayList<User> userList;
-	public ArrayList<String> planList;	
+	public ArrayList<String> planList;
 	public int lastConsolidation;
     public boolean reasoning;
     public String reasoning_from;
@@ -107,6 +107,8 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
     public InputCoordinator src;
     public Map<Integer, String> perspective_map;
     public ArrayList<Map<String, Integer>> plan_map;
+    public int dormantGroupCount=0;
+    
 	private void loadconfiguration(String f)
 	{
 		try
@@ -475,8 +477,22 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
 	    }
 		else if (event instanceof DormantGroupEvent)
 		{
-		
-			String prompt_message = "It looks like no one is using the chat. Use this space to discuss and come to a consensus about which plan you prefer while writing the proposal.";
+			int index = (int) (Math.random() * (userList.size() - .1));
+			
+			User selected_user = userList.get(index);
+String prompt_message;
+		//	String prompt_message = "It looks like no one is using the chat. Use this space to discuss and come to a consensus about which plan you prefer while writing the proposal.";
+			if(dormantGroupCount%2==0)
+			{
+			 prompt_message = "Hey " + selected_user.name + ", which of the plan seems to be the best from your perspective of " + 
+					perspective_map.get(selected_user.perspective) + " ?";
+			dormantGroupCount++;
+			}
+			else{
+			 prompt_message = "Hey " + selected_user.name + ", which plan do you recommend from your perspective of"+
+					perspective_map.get(selected_user.perspective) + " ?";
+			dormantGroupCount++;
+			}
 			PromptEvent prompt = new PromptEvent(source, prompt_message , "POKING");
 			source.queueNewEvent(prompt);
 					
