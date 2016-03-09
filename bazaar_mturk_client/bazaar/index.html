@@ -1,16 +1,47 @@
 <html>
 <head>
 <title id="title_el">Discussion Room</title>
+
 </head>
+
 <body>
+<div id="everything">
+
+    <div id="image_column">
+
+        <h2 id="image_header"  class="header">Etherpad</h2>
+                <div id="image_container" class="container">
+            <div id="images" class="scrollable"><iframe id= "myIframe" src="http://128.2.214.35:9001/p/abc" width="100%" height="100%"></iframe></div>
+        </div>
+    </div>
+
+    <div id="conversation_column">
+        <h2 id="conversation_header" class="header">Discussion</h2>
+        <div id="conversation_container" class="container">
+            <div id="conversation" class="scrollable"></div>
+        </div>
+        <div id="controls" class="control">
+            <div id="message_div"> <textarea id="data" /></textarea></div>
+            <div id="messagebutton_div">
+                <input class="button" type="button" id="datasend" value="Send Message" />
+            
+             <!--<input class="button" type="button" id="ready_button" value="We're Ready"/>-->
+            </div>
+    </div>
+    </div>
+    
+    <h2 id="roomname">Room</h2>
+
+
+</div>
+
 
 <link href='http://fonts.googleapis.com/css?family=Oxygen' rel='stylesheet' type='text/css'>
-<link href='http://rawgit.com/gtomar/help-button-javascript/master/discussion.css' rel='stylesheet' type='text/css'>
+<link href='https://raw.githubusercontent.com/marinawang/bazaar/master/discussion.css' rel='stylesheet' type='text/css'>
 <script src="/socket.io/socket.io.js"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 <script src="http://dadamson.bitbucket.org/include/colors.js"></script>
 <script src="http://dadamson.bitbucket.org/include/jquery.sortable.js"></script>
-
 
 
 <script>
@@ -70,7 +101,7 @@
 		 '<div class="message_line">'
 		+'<div class="info" '+(color?'style="background-color:'+color+'"':'')+'>'
 		+'<div class="user">'+ username +'</div>'
-		+'<div class="user" style="padding-left:5px">'+ text +'</div>'
+		+'<div class="user">'+ text +'</div>'
 		+'<div class="date">'+ (timestamp.toLocaleTimeString()) +'</div>'
 		+'</div>'
 		+'</div><br/>');
@@ -225,9 +256,9 @@
             else
                 appendMessage(new Date(entry["timestamp"]), entry.username, entry["content"]);	 
         }
-        
+
+        $('#images').stop().animate({ scrollTop: $("#images")[0].scrollHeight}, 500);
 		$('#conversation').stop().animate({ scrollTop: $("#conversation")[0].scrollHeight}, 500);
-		$('#images').stop().animate({ scrollTop: $("#images")[0].scrollHeight}, 500);
 			   lastDate = new Date();
 	});
 	
@@ -320,8 +351,9 @@
                 imageurl = "http://"+imageurl;
             }
             socket.emit('sendimage', imageurl);  
+
+            $('#images').stop().animate({ scrollTop: $("#images")[0].scrollHeight}, 500);
 		    $('#conversation').stop().animate({ scrollTop: $("#conversation")[0].scrollHeight}, 500);
-		    $('#images').stop().animate({ scrollTop: $("#images")[0].scrollHeight}, 500);
          }
     }
 
@@ -411,33 +443,7 @@
 
 </script>
 
-
-
-
-
-<div id="everything">
-    <div id="image_column">
-        <h2 id="image_header"  class="header">Etherpad</h2>
-                <div id="image_container" class="container">
-            <div id="images" class="scrollable"><iframe id= "myIframe" src="http://128.2.214.35:9001/p/abc" width="100%" height="100%"></iframe></div>
-        </div>
-    </div>
-    <div id="conversation_column">
-        <h2 id="conversation_header" class="header">Discussion</h2>
-        <div id="conversation_container" class="container">
-            <div id="conversation" class="scrollable"></div>
-        </div>
-        <div id="controls" class="control">
-            <div id="message_div"> <textarea id="data" /></textarea></div>
-            <div id="messagebutton_div">
-                <input class="button" type="button" id="datasend" value="Send Message" />
-            
-             <!--<input class="button" type="button" id="ready_button" value="We're Ready"/>-->
-            </div>
-    </div>
-    </div>
-    
-    <h2 id="roomname">Room</h2>
-</div>
 </body>
+
+
 </html>
