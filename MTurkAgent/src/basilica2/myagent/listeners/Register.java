@@ -480,7 +480,7 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
 			int index = (int) (Math.random() * (userList.size() - .1));
 			
 			User selected_user = userList.get(index);
-String prompt_message;
+            String prompt_message;
 		//	String prompt_message = "It looks like no one is using the chat. Use this space to discuss and come to a consensus about which plan you prefer while writing the proposal.";
 			if(dormantGroupCount%2==0)
 			{
