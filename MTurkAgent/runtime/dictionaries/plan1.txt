@@ -6,4 +6,3 @@ option1
 option one
 first choice
 1st choice
-plan A

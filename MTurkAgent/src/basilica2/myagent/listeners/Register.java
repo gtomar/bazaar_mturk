@@ -108,6 +108,11 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
     public Map<Integer, String> perspective_map;
     public ArrayList<Map<String, Integer>> plan_map;
     public int dormantGroupCount=0;
+    public int reasoningPromptCount=0;
+    public int reasoningchoicePromptCount=0;
+
+    public int evaluatechoicePromptCount=0;
+    public int evaluateplanPromptCount=0;
     
 	private void loadconfiguration(String f)
 	{
@@ -150,8 +155,7 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
 			{
 				return topicList.get(i);
 			}
-		}
-		
+		}	
 		return null;
 	}
 	
@@ -165,7 +169,6 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
 				return i;
 			}
 		}
-		
 		return -1;
 	}
 	
@@ -197,10 +200,8 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
 			
 			if(me.hasAnnotations("pos"))
 			{
-
 				if(userList.size() > 1)
-				{
-					
+				{		
 					int plan = 0;
 					int count = 0;
 						
@@ -259,14 +260,52 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
 						{
 							if(count > 1)
 							{
-								String prompt_message_ = "Hey " + selected_user.name + ", Can you evaluate " + me.getFrom() + "'s choice from your perspective of " + 
-										perspective_map.get(selected_user.perspective) + " ?";
+								String prompt_message_="";
+								
+								switch(evaluatechoicePromptCount%4){
+								case 0: 
+									 prompt_message_ = "Hey " + selected_user.name + ", Can you evaluate " + me.getFrom() + "'s choice from your perspective of " + 
+											perspective_map.get(selected_user.perspective) + " ?";
+									break;
+								case 1: 
+									 prompt_message_ = "Hey " + selected_user.name+ ", what do you think are the pros and cons of "+me.getFrom()+"'s choice from your perspective of "+
+											perspective_map.get(selected_user.perspective)+ " ?";
+									break;
+								case 2:
+									 prompt_message_ = selected_user.name+", how do you like "+me.getFrom()+"'s choice from your perspective of "+
+											perspective_map.get(selected_user.perspective)+ " ?";
+								    break;
+								case 3:
+									 prompt_message_ = selected_user.name+", will you recommend "+ me.getFrom()+"'s choice from your perspective of "+
+										    perspective_map.get(selected_user.perspective)+ " ?";
+									 break;
+								}
+								evaluatechoicePromptCount++;
 								PromptEvent prompt = new PromptEvent(source,prompt_message_,"plan_reasoning");
 								source.queueNewEvent(prompt);								
 							}
 							else{
-								String prompt_message_ = "Hey " + selected_user.name + ", Can you evaluate " + me.getFrom() + "'s plan from your perspective of " + 
-										perspective_map.get(selected_user.perspective) + " ?";
+								String prompt_message_="";
+									
+								switch(evaluateplanPromptCount%4){
+								case 0: 
+									 prompt_message_ = "Hey " + selected_user.name + ", Can you evaluate " + me.getFrom() + "'s plan from your perspective of " + 
+											perspective_map.get(selected_user.perspective) + " ?";
+									break;
+								case 1: 
+									 prompt_message_ = "Hey " + selected_user.name+ ", what do you think are the pros and cons of "+me.getFrom()+"'s plan from your perspective of "+
+											perspective_map.get(selected_user.perspective)+ " ?";
+									break;
+								case 2:
+									 prompt_message_ = selected_user.name+", how do you like "+me.getFrom()+"'s plan from your perspective of "+
+											perspective_map.get(selected_user.perspective)+ " ?";
+								    break;
+								case 3:
+									 prompt_message_ = selected_user.name+", will you recommend "+ me.getFrom()+"'s plan from your perspective of "+
+										    perspective_map.get(selected_user.perspective)+ " ?";
+									 break;
+								}
+								evaluateplanPromptCount++;						
 								PromptEvent prompt = new PromptEvent(source,prompt_message_,"plan_reasoning");
 								source.queueNewEvent(prompt);
 
@@ -346,15 +385,44 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
 							plan_map.get(plan-1).put("non_reasoning", temporary);
 							if(count > 1)
 							{
-								String prompt_message_ = "Hey " + me.getFrom() + ", Can you elaborate on your choice from your perspective of " + 
-										perspective_map.get(user.perspective) + " ?";
+								String prompt_message_="";
+								
+								switch(reasoningchoicePromptCount%2){
+								case 0: 
+									prompt_message_= "Hey "+ me.getFrom()+", can you more specific about your choice from your perspective of "+ 
+											perspective_map.get(user.perspective) + " ?";
+									break;
+								case 1:
+									 prompt_message_ = "Hey " + me.getFrom() + ", can you elaborate on your choice from your perspective of " + 
+												perspective_map.get(user.perspective) + " ?";
+									break;
+								}
+								
+								reasoningchoicePromptCount++;
 								PromptEvent prompt = new PromptEvent(source,prompt_message_,"plan_reasoning");
 								source.queueNewEvent(prompt);	
 							}
 							else
 							{
-								String prompt_message_ = "Hey " + me.getFrom() + ", Can you evaluate plan " + Integer.toString(plan) + " from your perspective of " + 
-									perspective_map.get(user.perspective) + " ?";
+								String prompt_message_="";
+								switch(reasoningPromptCount%3){
+								case 0:
+									prompt_message_ = "Hey " + me.getFrom() + ", can you evaluate plan " + Integer.toString(plan) + " from your perspective of " + 
+											perspective_map.get(user.perspective) + " ?";
+									break;
+								case 1:
+									prompt_message_ = me.getFrom() + ", can you be more specific about why you chose plan " + Integer.toString(plan) + " from your perspective of " + 
+											perspective_map.get(user.perspective) + " ?";
+									break;
+									
+								case 2: 
+									prompt_message_ = "Hey "+ me.getFrom() + ", what do you think are the pros and cons of plan " + Integer.toString(plan) + " from your perspective of " + 
+											perspective_map.get(user.perspective) + " ?";
+									break;
+									
+								}
+								
+								reasoningPromptCount++;
 								PromptEvent prompt = new PromptEvent(source,prompt_message_,"plan_reasoning");
 								source.queueNewEvent(prompt);
 								
@@ -451,15 +519,44 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
 						plan_map.get(plan-1).put("non_reasoning", temporary);
 						if(count > 1)
 						{
-							String prompt_message_ = "Hey " + me.getFrom() + ", Can you elaborate on choice from your perspective of " + 
-									perspective_map.get(user.perspective) + " ?";
+							String prompt_message_="";
+							
+							switch(reasoningchoicePromptCount%2){
+							case 0: 
+								prompt_message_= "Hey "+ me.getFrom()+", can you more specific about your choice from your perspective of "+ 
+										perspective_map.get(user.perspective) + " ?";
+								break;
+							case 1:
+								 prompt_message_ = "Hey " + me.getFrom() + ", can you elaborate on your choice from your perspective of " + 
+											perspective_map.get(user.perspective) + " ?";
+								break;
+							}
+							
+							reasoningchoicePromptCount++;
 							PromptEvent prompt = new PromptEvent(source,prompt_message_,"plan_reasoning");
 							source.queueNewEvent(prompt);
 						}
 						else
 						{
-							String prompt_message_ = "Hey " + me.getFrom() + ", Can you evaluate plan " + Integer.toString(plan) + " from your perspective of " + 
-								perspective_map.get(user.perspective) + " ?";
+							String prompt_message_="";
+							switch(reasoningPromptCount%3){
+							case 0:
+								prompt_message_ = "Hey " + me.getFrom() + ", can you evaluate plan " + Integer.toString(plan) + " from your perspective of " + 
+										perspective_map.get(user.perspective) + " ?";
+								break;
+							case 1:
+								prompt_message_ = me.getFrom() + ", can you be more specific about why you chose plan " + Integer.toString(plan) + " from your perspective of " + 
+										perspective_map.get(user.perspective) + " ?";
+								break;
+								
+							case 2: 
+								prompt_message_ = "Hey "+ me.getFrom() + ", what do you think are the pros and cons of plan " + Integer.toString(plan) + " from your perspective of " + 
+										perspective_map.get(user.perspective) + " ?";
+								break;
+								
+							}
+							
+							reasoningPromptCount++;
 							PromptEvent prompt = new PromptEvent(source,prompt_message_,"plan_reasoning");
 							source.queueNewEvent(prompt);
 							
@@ -489,7 +586,7 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
 			dormantGroupCount++;
 			}
 			else{
-			 prompt_message = "Hey " + selected_user.name + ", which plan do you recommend from your perspective of"+
+			 prompt_message = "Hey " + selected_user.name + ", which plan do you recommend from your perspective of "+
 					perspective_map.get(selected_user.perspective) + " ?";
 			dormantGroupCount++;
 			}
