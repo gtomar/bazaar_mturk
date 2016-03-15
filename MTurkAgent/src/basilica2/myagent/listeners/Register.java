@@ -41,18 +41,14 @@ import edu.cmu.cs.lti.project911.utils.time.Timer;
 public class Register implements BasilicaPreProcessor, TimeoutReceiver
 {
 	
-//    public void startTimer()
-//    {
-//    	timer = new Timer(3, this);
-//    	timer.start();
-//    }
-//    
+    public void startTimer()
+    {
+    	timer = new Timer(3, this);
+    	timer.start();
+    }
+    
  	
-	public void startTimer()
-	{
-		timer = new Timer(10*60, this);
-		timer.start();
-	}
+
 	public Register() 
     {
     	
@@ -118,9 +114,11 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
    
     public int evaluatechoicePromptCount=0;
     public int evaluateplanPromptCount=0;
+    
+    public boolean reasoningpromptflag= true; //true means should prompt
    
     public int bazaarstate=1;//bazaarstate= 1, prompt, bazaarstate=0, not prompt, after 10 minutes.
-    
+    public int totalseconds= 600;// countdown of 10 minutes;
     
 	private void loadconfiguration(String f)
 	{
@@ -258,7 +256,7 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
 						}
 					}
 					
-					if (plan!=0  && !me.hasAnnotations("NEGATIVE"))
+					if (plan!=0  && !me.hasAnnotations("NEGATIVE") && reasoningpromptflag)
 					{
 						int temporary = plan_map.get(plan-1).get("reasoning") + 1;
 						plan_map.get(plan-1).put("reasoning", temporary);
@@ -322,7 +320,11 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
 								selected_user.reasoning_flag[plan-1] = true;
 								
 							}
+						reasoningpromptflag=false;
 						}
+					}
+					else{
+					reasoningpromptflag=true;	
 					}
 				}		
 					
@@ -334,6 +336,10 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
 			}
 			else if(me.hasAnnotations("PLAN"))
 			{
+				if(reasoningpromptflag==false){
+					reasoningpromptflag=true;
+				}
+				
 				if(user.reasoning)
 				{
 //					if (planList.contains(user.reasoning_type))
@@ -471,6 +477,9 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
 			}
 			else if(user.reasoning)
 			{
+				if(reasoningpromptflag==false){
+					reasoningpromptflag=true;
+				}
 //				if (planList.contains(user.reasoning_type))
 //				{
 					int plan = 0;
@@ -578,6 +587,11 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
 				user.wait_duration = 0;
 			}
 			
+			else{
+				if(reasoningpromptflag==false){
+					reasoningpromptflag=true;
+				}
+			}
 			
 	    }
 		else if (event instanceof DormantGroupEvent)
@@ -791,87 +805,106 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
 	@Override
 	public void timedOut(String arg0) {
 		
+		totalseconds-=3;
+		if (totalseconds==0){
 		bazaarstate=0;
-		
+		}
 		// TODO Auto-generated method stub
 		
-//		for (int i =0 ;i< plan_map.size(); i++)
-//		{
-//		    Iterator it = ( plan_map.get(i)).entrySet().iterator();
-//		    while (it.hasNext()) {
-//		        Map.Entry pair = (Map.Entry)it.next();
-//		        //System.out.println(pair.getKey() + " = " + pair.getValue());
-//		        //it.remove(); // avoids a ConcurrentModificationException
-//		    }
-//		}
-//		for (int i = 0; i < userList.size(); i++)
-//		{
-//			if (userList.get(i).wait_duration == 0)
-//			{
-//				User user = userList.get(i);
-//				if(user.reasoning)
-//				{
-//					if (1==1)
-//					{
-//						int plan = 0;
-//						int count = 0;
-//						if (plan == 0 && user.reasoning)
-//						{
-//							if (user.reasoning_type.contains("PLAN1"))
-//							{
-//								plan = 1;
-//								count++;
-//							}
-//							if (user.reasoning_type.contains("PLAN2"))
-//							{
-//								plan = 2;
-//								count++;
-//							}
-//							if (user.reasoning_type.contains("PLAN3"))
-//							{
-//								plan = 3;
-//								count++;
-//							}						
-//							if (user.reasoning_type.contains("PLAN4"))
-//							{
-//								plan = 4;
-//								count++;
-//							}
-//						}
-//						
-//						if (plan!=0  && !user.reasoning_flag[plan-1])
-//						{
-//							int temporary = plan_map.get(plan-1).get("non_reasoning") + 1;
-//							plan_map.get(plan-1).put("non_reasoning", temporary);
-//		
-//							if(count > 1)
-//							{
-//								String prompt_message_ = "Hey " + user.name + ", Can you elaborate on your choice from your perspective of " + 
-//										perspective_map.get(user.perspective) + " ?";
-//								PromptEvent prompt = new PromptEvent(src,prompt_message_,"plan_reasoning");
-//								src.queueNewEvent(prompt);
-//							}
-//							else
-//							{
-//								String prompt_message_ = "Hey " + user.name + ", Can you evaluate plan " + Integer.toString(plan) + " from your perspective of " + 
-//									perspective_map.get(user.perspective) + " ?";
-//								PromptEvent prompt = new PromptEvent(src,prompt_message_,"plan_reasoning");
-//								src.queueNewEvent(prompt);
-//								
-//								user.reasoning_flag[plan-1] = true;
-//							}
-//						}
-//					}
-//
-//					user.reasoning = false;
-//					user.wait_duration = 0;
-//				}
-//			}
-//			else
-//			{
-//				userList.get(i).wait_duration = userList.get(i).wait_duration - 5;
-//			}
-//		}
+		for (int i = 0; i < userList.size(); i++)
+		{
+			if (userList.get(i).wait_duration == 0)
+			{
+				User user = userList.get(i);
+				if(user.reasoning)
+				{
+						int plan = 0;
+						int count = 0;
+						if (plan == 0 && user.reasoning)
+						{
+							if (user.reasoning_type.contains("PLAN1"))
+							{
+								plan = 1;
+								count++;
+							}
+							if (user.reasoning_type.contains("PLAN2"))
+							{
+								plan = 2;
+								count++;
+							}
+							if (user.reasoning_type.contains("PLAN3"))
+							{
+								plan = 3;
+								count++;
+							}						
+							if (user.reasoning_type.contains("PLAN4"))
+							{
+								plan = 4;
+								count++;
+							}
+						}
+						
+						if (plan!=0  && !user.reasoning_flag[plan-1])
+						{
+							int temporary = plan_map.get(plan-1).get("non_reasoning") + 1;
+							plan_map.get(plan-1).put("non_reasoning", temporary);
+		
+							if(count > 1)
+							{
+								String prompt_message_="";
+								
+								switch(reasoningchoicePromptCount%2){
+								case 0: 
+									prompt_message_= "Hey "+ user.name+", can you be more specific about your choice from your perspective of "+ 
+											perspective_map.get(user.perspective) + " ?";
+									break;
+								case 1:
+									 prompt_message_ = "Hey " + user.name + ", can you elaborate on your choice from your perspective of " + 
+												perspective_map.get(user.perspective) + " ?";
+									break;
+								}
+								reasoningchoicePromptCount++;
+								PromptEvent prompt = new PromptEvent(src,prompt_message_,"plan_reasoning");
+								src.queueNewEvent(prompt);
+							}
+							else
+							{
+								String prompt_message_="";
+							switch(reasoningPromptCount%3){
+							case 0:
+								prompt_message_ = "Hey " + user.name + ", can you evaluate plan " + Integer.toString(plan) + " from your perspective of " + 
+										perspective_map.get(user.perspective) + " ?";
+								break;
+							case 1:
+								prompt_message_ = user.name + ", can you be more specific about why you chose plan " + Integer.toString(plan) + " from your perspective of " + 
+										perspective_map.get(user.perspective) + " ?";
+								break;
+								
+							case 2: 
+								prompt_message_ = "Hey "+ user.name + ", what do you think are the pros and cons of plan " + Integer.toString(plan) + " from your perspective of " + 
+										perspective_map.get(user.perspective) + " ?";
+								break;
+								
+							}
+							
+							reasoningPromptCount++;
+								PromptEvent prompt = new PromptEvent(src,prompt_message_,"plan_reasoning");
+								src.queueNewEvent(prompt);
+								
+								user.reasoning_flag[plan-1] = true;
+							}
+						}
+					
+
+					user.reasoning = false;
+					user.wait_duration = 0;
+				}
+			}
+			else
+			{
+				userList.get(i).wait_duration = userList.get(i).wait_duration - 5;
+			}
+		}
 		
 		startTimer();
 		
