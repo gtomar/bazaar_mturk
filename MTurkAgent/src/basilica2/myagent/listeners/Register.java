@@ -258,7 +258,7 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
 						User selected_user = choose_random_user(me.getFrom(), plan);
 						if(selected_user != null)
 						{
-							if(count > 1)
+							if(count > 1 && !selected_user.choice_flag)
 							{
 								String prompt_message_="";
 								
@@ -282,9 +282,11 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
 								}
 								evaluatechoicePromptCount++;
 								PromptEvent prompt = new PromptEvent(source,prompt_message_,"plan_reasoning");
-								source.queueNewEvent(prompt);								
+								source.queueNewEvent(prompt);	
+								selected_user.choice_flag=true;
 							}
 							else{
+								
 								String prompt_message_="";
 									
 								switch(evaluateplanPromptCount%4){
@@ -310,6 +312,7 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
 								source.queueNewEvent(prompt);
 
 								selected_user.reasoning_flag[plan-1] = true;
+								
 							}
 						}
 					}
@@ -325,11 +328,10 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
 			}
 			else if(me.hasAnnotations("PLAN"))
 			{
-				
 				if(user.reasoning)
 				{
-					if (planList.contains(user.reasoning_type))
-					{
+//					if (planList.contains(user.reasoning_type))
+	//				{
 
 						int plan = 0;
 						int count = 0;
@@ -355,29 +357,29 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
 							count++;
 						}
 						
-						if (plan == 0 && user.reasoning)
-						{
-							if (user.reasoning_type.contains("PLAN1"))
-							{
-								plan = 1;
-								count++;
-							}
-							if (user.reasoning_type.contains("PLAN2"))
-							{
-								plan = 2;
-								count++;
-							}
-							if (user.reasoning_type.contains("PLAN3"))
-							{
-								plan = 3;
-								count++;
-							}						
-							if (user.reasoning_type.contains("PLAN4"))
-							{
-								plan = 4;
-								count++;
-							}
-						}
+//						if (plan == 0 && user.reasoning)
+//						{
+//							if (user.reasoning_type.contains("PLAN1"))
+//							{
+//								plan = 1;
+//								count++;
+//							}
+//							if (user.reasoning_type.contains("PLAN2"))
+//							{
+//								plan = 2;
+//								count++;
+//							}
+//							if (user.reasoning_type.contains("PLAN3"))
+//							{
+//								plan = 3;
+//								count++;
+//							}						
+//							if (user.reasoning_type.contains("PLAN4"))
+//							{
+//								plan = 4;
+//								count++;
+//							}
+//						}
 						
 						if (plan!=0 && !user.reasoning_flag[plan-1])
 						{
@@ -389,7 +391,7 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
 								
 								switch(reasoningchoicePromptCount%2){
 								case 0: 
-									prompt_message_= "Hey "+ me.getFrom()+", can you more specific about your choice from your perspective of "+ 
+									prompt_message_= "Hey "+ me.getFrom()+", can you be more specific about your choice from your perspective of "+ 
 											perspective_map.get(user.perspective) + " ?";
 									break;
 								case 1:
@@ -430,7 +432,7 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
 							}
 						}
 
-					}
+				//	}
 
 					user.reasoning = false;
 					user.wait_duration = 0;
@@ -463,34 +465,34 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
 			}
 			else if(user.reasoning)
 			{
-				if (planList.contains(user.reasoning_type))
-				{
+//				if (planList.contains(user.reasoning_type))
+//				{
 					int plan = 0;
 					int count = 0;
 					
-					if (me.hasAnnotations("PLAN1"))
-					{
-						plan = 1;
-						count++;
-					}
-					if (me.hasAnnotations("PLAN2"))
-					{
-						plan = 2;
-						count++;
-					}
-					if (me.hasAnnotations("PLAN3"))
-					{
-						plan = 3;
-						count++;
-					}						
-					if (me.hasAnnotations("PLAN4"))
-					{
-						plan = 4;
-						count++;
-					}
+//					if (me.hasAnnotations("PLAN1"))
+//					{
+//						plan = 1;
+//						count++;
+//					}
+//					if (me.hasAnnotations("PLAN2"))
+//					{
+//						plan = 2;
+//						count++;
+//					}
+//					if (me.hasAnnotations("PLAN3"))
+//					{
+//						plan = 3;
+//						count++;
+//					}						
+//					if (me.hasAnnotations("PLAN4"))
+//					{
+//						plan = 4;
+//						count++;
+//					}
 					
-					if (plan == 0 && user.reasoning)
-					{
+//					if (plan == 0 && user.reasoning)
+//					{
 						if (user.reasoning_type.contains("PLAN1"))
 						{
 							plan = 1;
@@ -511,7 +513,7 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
 							plan = 4;
 							count++;
 						}
-					}
+//					}
 					
 					if (plan!=0 && !user.reasoning_flag[plan-1])
 					{
@@ -523,7 +525,7 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
 							
 							switch(reasoningchoicePromptCount%2){
 							case 0: 
-								prompt_message_= "Hey "+ me.getFrom()+", can you more specific about your choice from your perspective of "+ 
+								prompt_message_= "Hey "+ me.getFrom()+", can you be more specific about your choice from your perspective of "+ 
 										perspective_map.get(user.perspective) + " ?";
 								break;
 							case 1:
@@ -564,7 +566,7 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
 						}
 					}
 	
-				}
+			//	}
 
 				user.reasoning = false;
 				user.wait_duration = 0;
@@ -716,9 +718,11 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
 		{
 			index = (int) (Math.random() * (userList.size() - .1));
 			User user = userList.get(index);
-			if(!user.reasoning_flag[plan-1] && !userList.get(index).name.equals(name))
+			if(!user.reasoning_flag[plan-1] && !userList.get(index).name.equals(name) && !user.user_flag.containsKey(name))
 			{
+				
 				found = true;
+				user.user_flag.put(name, 1);
 				return userList.get(index);
 			}
 			tries++;
