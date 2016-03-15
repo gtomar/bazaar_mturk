@@ -59,6 +59,8 @@ public class ActivityTracker extends BasilicaAdapter implements TimeoutReceiver
 	public static String GENERIC_NAME = "ActivityTracker";
 	public static String GENERIC_TYPE = "Filter";
 	private double activity_prompt_pulse = 3;
+	//private double chat_time=10; //no bazaar after 10 minutes;
+	
 	private int group_activity_min_threshold = 0; // Less than 2 turns in 3
 													// minutes is bad!
 	private Map<String, Integer> messageCounts;
@@ -107,8 +109,14 @@ public class ActivityTracker extends BasilicaAdapter implements TimeoutReceiver
 		}
 	}
 
+//	private void startTrackingofWholeChat(){
+//		Timer t= new Timer(chat_time, this);
+//		t.start();
+//	}
 	private void handleMessageEvent(MessageEvent me)
 	{
+//		startTrackingofWholeChat();// track the time of the whole chat
+		
 		if (!isTracking && shouldTrack) startTracking();
 		String from = me.getFrom();
 		Integer count = messageCounts.get(from);

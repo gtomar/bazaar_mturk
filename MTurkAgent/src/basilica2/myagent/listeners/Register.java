@@ -41,13 +41,18 @@ import edu.cmu.cs.lti.project911.utils.time.Timer;
 public class Register implements BasilicaPreProcessor, TimeoutReceiver
 {
 	
-    public void startTimer()
-    {
-    	timer = new Timer(3, this);
-    	timer.start();
-    }
-    
-	
+//    public void startTimer()
+//    {
+//    	timer = new Timer(3, this);
+//    	timer.start();
+//    }
+//    
+ 	
+	public void startTimer()
+	{
+		timer = new Timer(10*60, this);
+		timer.start();
+	}
 	public Register() 
     {
     	
@@ -110,9 +115,12 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
     public int dormantGroupCount=0;
     public int reasoningPromptCount=0;
     public int reasoningchoicePromptCount=0;
-
+   
     public int evaluatechoicePromptCount=0;
     public int evaluateplanPromptCount=0;
+   
+    public int bazaarstate=1;//bazaarstate= 1, prompt, bazaarstate=0, not prompt, after 10 minutes.
+    
     
 	private void loadconfiguration(String f)
 	{
@@ -144,7 +152,6 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
 			ex.printStackTrace();
 		}	    
 	}
-	
 	
 
 	public Topic IsInTopicList(String concept)
@@ -190,6 +197,7 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
 	public void preProcessEvent(InputCoordinator source, Event event)
 	{
 		src = source;
+		if(bazaarstate==1){
 		if (event instanceof MessageEvent)
 		{
 			MessageEvent me = (MessageEvent)event;
@@ -316,9 +324,7 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
 							}
 						}
 					}
-				}
-				
-				
+				}		
 					
 				if(user.reasoning) 
 				{
@@ -641,6 +647,8 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
 				}
 			}
 		}
+		
+	}
 	}
 	
     public String discussedTopics()
@@ -782,87 +790,88 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
 
 	@Override
 	public void timedOut(String arg0) {
+		
+		bazaarstate=0;
+		
 		// TODO Auto-generated method stub
 		
-		for (int i =0 ;i< plan_map.size(); i++)
-		{
-		    Iterator it = ( plan_map.get(i)).entrySet().iterator();
-		    while (it.hasNext()) {
-		        Map.Entry pair = (Map.Entry)it.next();
-		        //System.out.println(pair.getKey() + " = " + pair.getValue());
-		        //it.remove(); // avoids a ConcurrentModificationException
-		    }
-		}
-		for (int i = 0; i < userList.size(); i++)
-		{
-			if (userList.get(i).wait_duration == 0)
-			{
-				User user = userList.get(i);
-				if(user.reasoning)
-				{
-					if (1==1)
-					{
-						int plan = 0;
-						int count = 0;
-						if (plan == 0 && user.reasoning)
-						{
-							if (user.reasoning_type.contains("PLAN1"))
-							{
-								plan = 1;
-								count++;
-							}
-							if (user.reasoning_type.contains("PLAN2"))
-							{
-								plan = 2;
-								count++;
-							}
-							if (user.reasoning_type.contains("PLAN3"))
-							{
-								plan = 3;
-								count++;
-							}						
-							if (user.reasoning_type.contains("PLAN4"))
-							{
-								plan = 4;
-								count++;
-							}
-						}
-						
-						if (plan!=0  && !user.reasoning_flag[plan-1])
-						{
-							int temporary = plan_map.get(plan-1).get("non_reasoning") + 1;
-							plan_map.get(plan-1).put("non_reasoning", temporary);
-		
-							if(count > 1)
-							{
-								String prompt_message_ = "Hey " + user.name + ", Can you elaborate on your choice from your perspective of " + 
-										perspective_map.get(user.perspective) + " ?";
-								PromptEvent prompt = new PromptEvent(src,prompt_message_,"plan_reasoning");
-								src.queueNewEvent(prompt);
-							}
-							else
-							{
-								String prompt_message_ = "Hey " + user.name + ", Can you evaluate plan " + Integer.toString(plan) + " from your perspective of " + 
-									perspective_map.get(user.perspective) + " ?";
-								PromptEvent prompt = new PromptEvent(src,prompt_message_,"plan_reasoning");
-								src.queueNewEvent(prompt);
-								
-								user.reasoning_flag[plan-1] = true;
-							}
-						}
-						
-
-					}
-
-					user.reasoning = false;
-					user.wait_duration = 0;
-				}
-			}
-			else
-			{
-				userList.get(i).wait_duration = userList.get(i).wait_duration - 5;
-			}
-		}
+//		for (int i =0 ;i< plan_map.size(); i++)
+//		{
+//		    Iterator it = ( plan_map.get(i)).entrySet().iterator();
+//		    while (it.hasNext()) {
+//		        Map.Entry pair = (Map.Entry)it.next();
+//		        //System.out.println(pair.getKey() + " = " + pair.getValue());
+//		        //it.remove(); // avoids a ConcurrentModificationException
+//		    }
+//		}
+//		for (int i = 0; i < userList.size(); i++)
+//		{
+//			if (userList.get(i).wait_duration == 0)
+//			{
+//				User user = userList.get(i);
+//				if(user.reasoning)
+//				{
+//					if (1==1)
+//					{
+//						int plan = 0;
+//						int count = 0;
+//						if (plan == 0 && user.reasoning)
+//						{
+//							if (user.reasoning_type.contains("PLAN1"))
+//							{
+//								plan = 1;
+//								count++;
+//							}
+//							if (user.reasoning_type.contains("PLAN2"))
+//							{
+//								plan = 2;
+//								count++;
+//							}
+//							if (user.reasoning_type.contains("PLAN3"))
+//							{
+//								plan = 3;
+//								count++;
+//							}						
+//							if (user.reasoning_type.contains("PLAN4"))
+//							{
+//								plan = 4;
+//								count++;
+//							}
+//						}
+//						
+//						if (plan!=0  && !user.reasoning_flag[plan-1])
+//						{
+//							int temporary = plan_map.get(plan-1).get("non_reasoning") + 1;
+//							plan_map.get(plan-1).put("non_reasoning", temporary);
+//		
+//							if(count > 1)
+//							{
+//								String prompt_message_ = "Hey " + user.name + ", Can you elaborate on your choice from your perspective of " + 
+//										perspective_map.get(user.perspective) + " ?";
+//								PromptEvent prompt = new PromptEvent(src,prompt_message_,"plan_reasoning");
+//								src.queueNewEvent(prompt);
+//							}
+//							else
+//							{
+//								String prompt_message_ = "Hey " + user.name + ", Can you evaluate plan " + Integer.toString(plan) + " from your perspective of " + 
+//									perspective_map.get(user.perspective) + " ?";
+//								PromptEvent prompt = new PromptEvent(src,prompt_message_,"plan_reasoning");
+//								src.queueNewEvent(prompt);
+//								
+//								user.reasoning_flag[plan-1] = true;
+//							}
+//						}
+//					}
+//
+//					user.reasoning = false;
+//					user.wait_duration = 0;
+//				}
+//			}
+//			else
+//			{
+//				userList.get(i).wait_duration = userList.get(i).wait_duration - 5;
+//			}
+//		}
 		
 		startTimer();
 		
