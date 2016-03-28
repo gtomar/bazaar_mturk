@@ -8,10 +8,13 @@ public class User {
     public String name;
     public String id;
 	public Timestamp time_of_entry;
+	public int plan;
 	public int score;
 	public boolean[] reasoning_flag;
 //	public boolean[] user_flag;
 	public boolean reasoning;
+	
+	public boolean promptflag;
 	public String reasoning_type;
 	public boolean choice_flag;
 	public int wait_duration;
@@ -29,6 +32,7 @@ public class User {
     	choice_flag=false;
     	reasoning_type = "";
     	reasoning = false;
+    	promptflag=false;
     	wait_duration = 10;
     	perspective = user_perspective;
     }

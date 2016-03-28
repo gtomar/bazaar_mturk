@@ -58,9 +58,9 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
     	reasoning = false;
     	
     	perspective_map = new HashMap<Integer, String>();
-    	perspective_map.put(0,"most economical");
-    	perspective_map.put(1,"environmental friendliness and low startup cost");
-    	perspective_map.put(2,"carbon neutrality and economical in the long run");
+    	perspective_map.put(0,"what would be the most economical");
+    	perspective_map.put(1,"what would be most environmentally friendly and with lowest startup costs");
+    	perspective_map.put(2,"carbon neutrality and what is best economically in the long run");
     	perspective_map.put(3,"environmental friendliness and reliability");
 
     	plan_map = new ArrayList<Map<String, Integer>>();
@@ -115,8 +115,10 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
     public int evaluatechoicePromptCount=0;
     public int evaluateplanPromptCount=0;
     
-    public boolean reasoningpromptflag= true; //true means should prompt
-   
+    public int[] planflag = {0,0,0,0};
+    public int reasoningflag= 0;
+    public int noreasoningflag=0;
+         
     public int bazaarstate=1;//bazaarstate= 1, prompt, bazaarstate=0, not prompt, after 10 minutes.
     public int totalseconds= 600;// countdown of 10 minutes;
     
@@ -256,45 +258,36 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
 						}
 					}
 					
-					if (plan!=0  && !me.hasAnnotations("NEGATIVE") && reasoningpromptflag)
+					if (plan!=0  && !me.hasAnnotations("NEGATIVE"))
 					{
-						int temporary = plan_map.get(plan-1).get("reasoning") + 1;
-						plan_map.get(plan-1).put("reasoning", temporary);
-						
-						User selected_user = choose_random_user(me.getFrom(), plan);
-						if(selected_user != null)
-						{
-							if(count > 1 && !selected_user.choice_flag)
-							{
-								String prompt_message_="";
-								
-								switch(evaluatechoicePromptCount%4){
-								case 0: 
-									 prompt_message_ = "Hey " + selected_user.name + ", Can you evaluate " + me.getFrom() + "'s choice from your perspective of " + 
-											perspective_map.get(selected_user.perspective) + " ?";
-									break;
-								case 1: 
-									 prompt_message_ = "Hey " + selected_user.name+ ", what do you think are the pros and cons of "+me.getFrom()+"'s choice from your perspective of "+
-											perspective_map.get(selected_user.perspective)+ " ?";
-									break;
-								case 2:
-									 prompt_message_ = selected_user.name+", how do you like "+me.getFrom()+"'s choice from your perspective of "+
-											perspective_map.get(selected_user.perspective)+ " ?";
-								    break;
-								case 3:
-									 prompt_message_ = selected_user.name+", will you recommend "+ me.getFrom()+"'s choice from your perspective of "+
-										    perspective_map.get(selected_user.perspective)+ " ?";
-									 break;
-								}
-								evaluatechoicePromptCount++;
-								PromptEvent prompt = new PromptEvent(source,prompt_message_,"plan_reasoning");
-								source.queueNewEvent(prompt);	
-								selected_user.choice_flag=true;
-							}
-							else{
-								
-								String prompt_message_="";
+							if(count==1){		
+								if (planflag[plan-1]==0 & reasoningflag==0){
+
+									user.plan=plan;
+									planflag[plan-1]=1;
+									reasoningflag=0;
+									User userwithplan = choose_user_with_plan(me.getFrom(), plan);
 									
+									if(userwithplan!=null){
+										String prompt_message_="";
+										prompt_message_="Hey " + userwithplan.name+", you have proposed plan "+userwithplan.plan+", and "+me.getFrom()+ " has proposed plan "+plan+". Can you"
+												+ " compare the two plans from your perpsective of "+ perspective_map.get(userwithplan.perspective) + " ?";
+									
+										PromptEvent prompt = new PromptEvent(source,prompt_message_,"plan_reasoning");
+										source.queueNewEvent(prompt);
+                                    planflag[plan-1]=2;
+                                    planflag[userwithplan.plan-1]=2;
+                                    reasoningflag=1;
+                                    userwithplan.promptflag=true;
+									}
+								}
+								
+								else if (planflag[plan-1]==0 & reasoningflag==1){
+                                   
+                                    User selected_user = choose_random_user(me.getFrom(), plan);
+
+								String prompt_message_="";
+									if(selected_user!=null){
 								switch(evaluateplanPromptCount%4){
 								case 0: 
 									 prompt_message_ = "Hey " + selected_user.name + ", Can you evaluate " + me.getFrom() + "'s plan from your perspective of " + 
@@ -317,15 +310,35 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
 								PromptEvent prompt = new PromptEvent(source,prompt_message_,"plan_reasoning");
 								source.queueNewEvent(prompt);
 
-								selected_user.reasoning_flag[plan-1] = true;
+								 selected_user.promptflag = true;
+								 user.plan= plan;
+								 planflag[plan-1]=2;
+								 reasoningflag =0;
+								}
+								}
+							
+								else if(planflag[plan-1]==1){
+									user.plan=plan;
+
+								User userwithplan = choose_user_with_plan(me.getFrom(), plan);
+								if(userwithplan!=null){
+									String prompt_message_="";
+									prompt_message_="Hey " + userwithplan.name+", you have proposed plan "+userwithplan.plan+", and "+me.getFrom()+ " has proposed plan "+plan+". Can you"
+											+ " compare the two plans from your perpsective of "+ perspective_map.get(userwithplan.perspective) + " ?";
 								
+									PromptEvent prompt = new PromptEvent(source,prompt_message_,"plan_reasoning");
+									source.queueNewEvent(prompt);
+                                planflag[plan-1]=2;
+                                planflag[userwithplan.plan-1]=2;
+                                reasoningflag=1;
+                                userwithplan.promptflag=true;
+								}
 							}
-						reasoningpromptflag=false;
-						}
+							
+							}
+						
 					}
-					else{
-					reasoningpromptflag=true;	
-					}
+					
 				}		
 					
 				if(user.reasoning) 
@@ -336,14 +349,8 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
 			}
 			else if(me.hasAnnotations("PLAN"))
 			{
-				if(reasoningpromptflag==false){
-					reasoningpromptflag=true;
-				}
-				
 				if(user.reasoning)
 				{
-//					if (planList.contains(user.reasoning_type))
-	//				{
 
 						int plan = 0;
 						int count = 0;
@@ -368,89 +375,87 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
 							plan = 4;
 							count++;
 						}
+
 						
-//						if (plan == 0 && user.reasoning)
-//						{
-//							if (user.reasoning_type.contains("PLAN1"))
-//							{
-//								plan = 1;
-//								count++;
-//							}
-//							if (user.reasoning_type.contains("PLAN2"))
-//							{
-//								plan = 2;
-//								count++;
-//							}
-//							if (user.reasoning_type.contains("PLAN3"))
-//							{
-//								plan = 3;
-//								count++;
-//							}						
-//							if (user.reasoning_type.contains("PLAN4"))
-//							{
-//								plan = 4;
-//								count++;
-//							}
-//						}
-						
-						if (plan!=0 && !user.reasoning_flag[plan-1])
+						if (plan!=0 && !me.hasAnnotations("NEGATIVE"))
 						{
-							int temporary = plan_map.get(plan-1).get("non_reasoning") + 1;
-							plan_map.get(plan-1).put("non_reasoning", temporary);
-							if(count > 1)
-							{
-								String prompt_message_="";
-								
-								switch(reasoningchoicePromptCount%2){
-								case 0: 
-									prompt_message_= "Hey "+ me.getFrom()+", can you be more specific about your choice from your perspective of "+ 
-											perspective_map.get(user.perspective) + " ?";
-									break;
-								case 1:
-									 prompt_message_ = "Hey " + me.getFrom() + ", can you elaborate on your choice from your perspective of " + 
-												perspective_map.get(user.perspective) + " ?";
-									break;
-								}
-								
-								reasoningchoicePromptCount++;
-								PromptEvent prompt = new PromptEvent(source,prompt_message_,"plan_reasoning");
-								source.queueNewEvent(prompt);	
-							}
-							else
-							{
-								String prompt_message_="";
+							if(count==1)
+							{					
+							if(planflag[plan-1]==0 && noreasoningflag==0){
+								planflag[plan-1]=1;
+							    user.plan= plan;
+							    
+								if(user.promptflag==false){
+									String prompt_message_="";
+
 								switch(reasoningPromptCount%3){
 								case 0:
-									prompt_message_ = "Hey " + me.getFrom() + ", can you evaluate plan " + Integer.toString(plan) + " from your perspective of " + 
+									prompt_message_ = "Hey " + me.getFrom() + ", can you elaborate on the reason you chose plan " + Integer.toString(plan) + " from your perspective of " + 
 											perspective_map.get(user.perspective) + " ?";
 									break;
 								case 1:
 									prompt_message_ = me.getFrom() + ", can you be more specific about why you chose plan " + Integer.toString(plan) + " from your perspective of " + 
 											perspective_map.get(user.perspective) + " ?";
-									break;
-									
+									break;			
 								case 2: 
 									prompt_message_ = "Hey "+ me.getFrom() + ", what do you think are the pros and cons of plan " + Integer.toString(plan) + " from your perspective of " + 
 											perspective_map.get(user.perspective) + " ?";
-									break;
-									
+									break;		
 								}
-								
 								reasoningPromptCount++;
 								PromptEvent prompt = new PromptEvent(source,prompt_message_,"plan_reasoning");
-								source.queueNewEvent(prompt);
+								source.queueNewEvent(prompt);						
+							    noreasoningflag=1;
+							    user.promptflag=true;
+								}
 								
-								user.reasoning_flag[plan-1] = true;
+							}
+							
+							else if (planflag[plan-1]==0 && noreasoningflag==1){
+								user.plan=plan;
+								planflag[plan-1]=1;
+								User userwithplan = choose_user_with_plan_noreasoning(me.getFrom(), plan);
+								if(user.promptflag==false&&userwithplan!=null){
+									String prompt_message_="";
+									prompt_message_="Hey " + me.getFrom()+", you have proposed plan "+plan+", and "+userwithplan.name+ " has proposed plan "+userwithplan.plan+". What do"
+											+ " you think are the most important trade-offs between the two plans from your perspective of "+ perspective_map.get(user.perspective) + " ?";
+								
+									PromptEvent prompt = new PromptEvent(source,prompt_message_,"plan_reasoning");
+									source.queueNewEvent(prompt);
+                                planflag[plan-1]=2;
+                                planflag[userwithplan.plan-1]=2;
+                                noreasoningflag=0;
+                                user.promptflag=true;
+								}
+							}
+							
+							else if (planflag[plan-1]==1){
+								user.plan=plan;
+
+								User userwithplan = choose_user_with_plan_noreasoning(me.getFrom(), plan);
+								if(user.promptflag==false && userwithplan!=null){
+									String prompt_message_="";
+									prompt_message_="Hey " + me.getFrom()+", you have proposed plan "+plan+", and "+userwithplan.name+ " has proposed plan "+userwithplan.plan+". What do"
+											+ " you think are the most important trade-offs between the two plans from your perspective of "+ perspective_map.get(user.perspective) + " ?";
+								
+									PromptEvent prompt = new PromptEvent(source,prompt_message_,"plan_reasoning");
+									source.queueNewEvent(prompt);
+                                planflag[plan-1]=2;
+                                planflag[userwithplan.plan-1]=2;
+                                noreasoningflag=0;
+                                user.promptflag=true;
+								}
+								
+							}	
 							}
 						}
-
-				//	}
-
+						
 					user.reasoning = false;
 					user.wait_duration = 0;
 				}
 				else
 				{
+					if(!me.hasAnnotations("NEGATIVE")){
 					user.reasoning = true;
 
 					user.reasoning_type = "";
@@ -472,42 +477,16 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
 					}
 					
 					user.wait_duration = 10;
+					}
 				}
-
 			}
 			else if(user.reasoning)
 			{
-				if(reasoningpromptflag==false){
-					reasoningpromptflag=true;
-				}
-//				if (planList.contains(user.reasoning_type))
-//				{
+				
+
 					int plan = 0;
 					int count = 0;
-					
-//					if (me.hasAnnotations("PLAN1"))
-//					{
-//						plan = 1;
-//						count++;
-//					}
-//					if (me.hasAnnotations("PLAN2"))
-//					{
-//						plan = 2;
-//						count++;
-//					}
-//					if (me.hasAnnotations("PLAN3"))
-//					{
-//						plan = 3;
-//						count++;
-//					}						
-//					if (me.hasAnnotations("PLAN4"))
-//					{
-//						plan = 4;
-//						count++;
-//					}
-					
-//					if (plan == 0 && user.reasoning)
-//					{
+
 						if (user.reasoning_type.contains("PLAN1"))
 						{
 							plan = 1;
@@ -528,93 +507,112 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
 							plan = 4;
 							count++;
 						}
-//					}
 					
-					if (plan!=0 && !user.reasoning_flag[plan-1])
+					if (plan!=0 && !me.hasAnnotations("NEGATIVE"))
 					{
-						int temporary = plan_map.get(plan-1).get("non_reasoning") + 1;
-						plan_map.get(plan-1).put("non_reasoning", temporary);
-						if(count > 1)
+						if(count==1)
 						{
-							String prompt_message_="";
-							
-							switch(reasoningchoicePromptCount%2){
-							case 0: 
-								prompt_message_= "Hey "+ me.getFrom()+", can you be more specific about your choice from your perspective of "+ 
-										perspective_map.get(user.perspective) + " ?";
-								break;
-							case 1:
-								 prompt_message_ = "Hey " + me.getFrom() + ", can you elaborate on your choice from your perspective of " + 
+							if(planflag[plan-1]==0 && noreasoningflag==0){
+								 planflag[plan-1]=1;
+								    user.plan= plan;
+								    
+								if(user.promptflag==false){
+									String prompt_message_="";
+
+								switch(reasoningPromptCount%3){
+								case 0:
+									prompt_message_ = "Hey " + me.getFrom() + ", can you elaborate on the reason you chose plan " + Integer.toString(plan) + " from your perspective of " + 
 											perspective_map.get(user.perspective) + " ?";
-								break;
-							}
-							
-							reasoningchoicePromptCount++;
-							PromptEvent prompt = new PromptEvent(source,prompt_message_,"plan_reasoning");
-							source.queueNewEvent(prompt);
-						}
-						else
-						{
-							String prompt_message_="";
-							switch(reasoningPromptCount%3){
-							case 0:
-								prompt_message_ = "Hey " + me.getFrom() + ", can you evaluate plan " + Integer.toString(plan) + " from your perspective of " + 
-										perspective_map.get(user.perspective) + " ?";
-								break;
-							case 1:
-								prompt_message_ = me.getFrom() + ", can you be more specific about why you chose plan " + Integer.toString(plan) + " from your perspective of " + 
-										perspective_map.get(user.perspective) + " ?";
-								break;
-								
-							case 2: 
-								prompt_message_ = "Hey "+ me.getFrom() + ", what do you think are the pros and cons of plan " + Integer.toString(plan) + " from your perspective of " + 
-										perspective_map.get(user.perspective) + " ?";
-								break;
+									break;
+								case 1:
+									prompt_message_ = me.getFrom() + ", can you be more specific about why you chose plan " + Integer.toString(plan) + " from your perspective of " + 
+											perspective_map.get(user.perspective) + " ?";
+									break;			
+								case 2: 
+									prompt_message_ = "Hey "+ me.getFrom() + ", what do you think are the pros and cons of plan " + Integer.toString(plan) + " from your perspective of " + 
+											perspective_map.get(user.perspective) + " ?";
+									break;		
+								}
+								noreasoningflag=1;
+								reasoningPromptCount++;
+								PromptEvent prompt = new PromptEvent(source,prompt_message_,"plan_reasoning");
+								source.queueNewEvent(prompt);						   
+							    user.promptflag=true;
+								}
 								
 							}
+							else if (planflag[plan-1]==0 && noreasoningflag==1){
+								user.plan=plan;
+								planflag[plan-1]=1;
+								User userwithplan = choose_user_with_plan_noreasoning(me.getFrom(), plan);
+								if(user.promptflag==false&&userwithplan!=null){
+									String prompt_message_="";
+									prompt_message_="Hey " + me.getFrom()+", you have proposed plan "+plan+", and "+userwithplan.name+ " has proposed plan "+userwithplan.plan+". What do"
+											+ " you think are the most important trade-offs between the two plans from your perspective of "+ perspective_map.get(user.perspective) + " ?";
+								
+									PromptEvent prompt = new PromptEvent(source,prompt_message_,"plan_reasoning");
+									source.queueNewEvent(prompt);
+                                planflag[plan-1]=2;
+                                planflag[userwithplan.plan-1]=2;
+                                noreasoningflag=0;
+                                user.promptflag=true;
+								}
+							}
 							
-							reasoningPromptCount++;
-							PromptEvent prompt = new PromptEvent(source,prompt_message_,"plan_reasoning");
-							source.queueNewEvent(prompt);
+							else if (planflag[plan-1]==1){
+								user.plan=plan;
+
+								User userwithplan = choose_user_with_plan_noreasoning(me.getFrom(), plan);
+								if(user.promptflag==false && userwithplan!=null){
+									String prompt_message_="";
+									prompt_message_="Hey " + me.getFrom()+", you have proposed plan "+plan+", and "+userwithplan.name+ " has proposed plan "+userwithplan.plan+". What do"
+											+ " you think are the most important trade-offs between the two plans from your perspective of "+ perspective_map.get(user.perspective) + " ?";
+								
+									PromptEvent prompt = new PromptEvent(source,prompt_message_,"plan_reasoning");
+									source.queueNewEvent(prompt);
+                                planflag[plan-1]=2;
+                                planflag[userwithplan.plan-1]=2;
+                                noreasoningflag=0;
+                                user.promptflag=true;
+								}
+								
+							}		
 							
-							user.reasoning_flag[plan-1] = true;
+							
+			
 						}
 					}
 	
-			//	}
+
 
 				user.reasoning = false;
 				user.wait_duration = 0;
 			}
 			
-			else{
-				if(reasoningpromptflag==false){
-					reasoningpromptflag=true;
-				}
-			}
 			
 	    }
 		else if (event instanceof DormantGroupEvent)
 		{
-			int index = (int) (Math.random() * (userList.size() - .1));
 			
-			User selected_user = userList.get(index);
+			User selected_user_dormant = choose_user_dormant();
+			if(selected_user_dormant!=null){
+			
             String prompt_message;
 		//	String prompt_message = "It looks like no one is using the chat. Use this space to discuss and come to a consensus about which plan you prefer while writing the proposal.";
 			if(dormantGroupCount%2==0)
 			{
-			 prompt_message = "Hey " + selected_user.name + ", which of the plan seems to be the best from your perspective of " + 
-					perspective_map.get(selected_user.perspective) + " ?";
+			 prompt_message = "Hey " + selected_user_dormant.name + ", which of the plans seems to be the best from your perspective of " + 
+					perspective_map.get(selected_user_dormant.perspective) + " ?";
 			dormantGroupCount++;
 			}
 			else{
-			 prompt_message = "Hey " + selected_user.name + ", which plan do you recommend from your perspective of "+
-					perspective_map.get(selected_user.perspective) + " ?";
+			 prompt_message = "Hey " + selected_user_dormant.name + ", which plan do you recommend from your perspective of "+
+					perspective_map.get(selected_user_dormant.perspective) + " ?";
 			dormantGroupCount++;
 			}
 			PromptEvent prompt = new PromptEvent(source, prompt_message , "POKING");
 			source.queueNewEvent(prompt);
-					
+			}			
 		}
 		else if (event instanceof PresenceEvent)
 		{
@@ -731,6 +729,39 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
 		
 	}
 	
+	public User choose_user_with_plan(String name, int plan){
+		for(int i =0; i< userList.size(); i++){
+			User usertemp= userList.get(i);
+			if (usertemp.plan!=0){
+			if(!usertemp.name.equals(name)&&usertemp.plan!=plan && planflag[usertemp.plan-1]==1 && !usertemp.promptflag){
+				return usertemp;
+			}
+			}
+		}
+	return null;
+	}
+	
+	public User choose_user_with_plan_noreasoning(String name, int plan){
+		for(int i =0; i< userList.size(); i++){
+			User usertemp= userList.get(i);
+			if (usertemp.plan!=0){
+			if(!usertemp.name.equals(name)&&usertemp.plan!=plan && planflag[usertemp.plan-1]==1){
+				return usertemp;
+			}
+			}
+		}
+	return null;
+	}
+	
+	public User choose_user_dormant(){
+		for(int i=0; i< userList.size(); i++){
+			User userdormant = userList.get(i);
+			if(!userdormant.promptflag){
+				return userdormant;
+			}
+		}
+		return null;
+	}
 	public User choose_random_user(String name, int plan )
 	{
 		int index = (int) (Math.random() * (userList.size() - .1));
@@ -740,7 +771,7 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
 		{
 			index = (int) (Math.random() * (userList.size() - .1));
 			User user = userList.get(index);
-			if(!user.reasoning_flag[plan-1] && !userList.get(index).name.equals(name) && !user.user_flag.containsKey(name))
+			if(!userList.get(index).name.equals(name) && !user.user_flag.containsKey(name) && !user.promptflag)
 			{
 				
 				found = true;
@@ -804,6 +835,9 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
 
 	@Override
 	public void timedOut(String arg0) {
+		for(int i =0; i< 4; i++){
+			System.out.println(planflag[i]);
+		}
 		
 		totalseconds-=3;
 		if (totalseconds==0){
@@ -844,35 +878,16 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
 							}
 						}
 						
-						if (plan!=0  && !user.reasoning_flag[plan-1])
+						if (plan!=0 )
 						{
-							int temporary = plan_map.get(plan-1).get("non_reasoning") + 1;
-							plan_map.get(plan-1).put("non_reasoning", temporary);
-		
-							if(count > 1)
+							if(count==1)
 							{
-								String prompt_message_="";
-								
-								switch(reasoningchoicePromptCount%2){
-								case 0: 
-									prompt_message_= "Hey "+ user.name+", can you be more specific about your choice from your perspective of "+ 
-											perspective_map.get(user.perspective) + " ?";
-									break;
-								case 1:
-									 prompt_message_ = "Hey " + user.name + ", can you elaborate on your choice from your perspective of " + 
-												perspective_map.get(user.perspective) + " ?";
-									break;
-								}
-								reasoningchoicePromptCount++;
-								PromptEvent prompt = new PromptEvent(src,prompt_message_,"plan_reasoning");
-								src.queueNewEvent(prompt);
-							}
-							else
-							{
+								if(planflag[plan-1]==0 && user.promptflag==false && noreasoningflag==0){
+									
 								String prompt_message_="";
 							switch(reasoningPromptCount%3){
 							case 0:
-								prompt_message_ = "Hey " + user.name + ", can you evaluate plan " + Integer.toString(plan) + " from your perspective of " + 
+								prompt_message_ = "Hey " + user.name + ", can you elaborate on the reason you chose plan " + Integer.toString(plan) + " from your perspective of " + 
 										perspective_map.get(user.perspective) + " ?";
 								break;
 							case 1:
@@ -886,16 +901,55 @@ public class Register implements BasilicaPreProcessor, TimeoutReceiver
 								break;
 								
 							}
-							
-							reasoningPromptCount++;
+							    reasoningPromptCount++;
 								PromptEvent prompt = new PromptEvent(src,prompt_message_,"plan_reasoning");
 								src.queueNewEvent(prompt);
+								planflag[plan-1]=1;
+								user.promptflag=true;
+							    user.plan= plan;
+								noreasoningflag=1;
+								}
 								
-								user.reasoning_flag[plan-1] = true;
+						
+								else if (planflag[plan-1]==0 && noreasoningflag==1){
+									user.plan=plan;
+									planflag[plan-1]=1;
+									User userwithplan = choose_user_with_plan_noreasoning(user.name, plan);
+									if(user.promptflag==false&&userwithplan!=null){
+										String prompt_message_="";
+										prompt_message_="Hey " + user.name+", you have proposed plan "+plan+", and "+userwithplan.name+ " has proposed plan "+userwithplan.plan+". What do"
+												+ " you think are the most important trade-offs between the two plans from your perspective of "+ perspective_map.get(user.perspective) + " ?";
+									
+										PromptEvent prompt = new PromptEvent(src,prompt_message_,"plan_reasoning");
+										src.queueNewEvent(prompt);
+	                                planflag[plan-1]=2;
+	                                planflag[userwithplan.plan-1]=2;
+	                                noreasoningflag=0;
+	                                user.promptflag=true;
+									}
+								}
+								
+								else if (planflag[plan-1]==1){
+									user.plan=plan;
+
+									User userwithplan = choose_user_with_plan_noreasoning(user.name, plan);
+									if(user.promptflag==false && userwithplan!=null){
+										String prompt_message_="";
+										prompt_message_="Hey " + user.name+", you have proposed plan "+plan+", and "+userwithplan.name+ " has proposed plan "+userwithplan.plan+". What do"
+												+ " you think are the most important trade-offs between the two plans from your perspective of "+ perspective_map.get(user.perspective) + " ?";
+									
+										PromptEvent prompt = new PromptEvent(src,prompt_message_,"plan_reasoning");
+										src.queueNewEvent(prompt);
+	                                planflag[plan-1]=2;
+	                                planflag[userwithplan.plan-1]=2;
+	                                noreasoningflag=0;
+	                                user.promptflag=true;
+									}
+									
+								}		
 							}
 						}
-					
-
+				
 					user.reasoning = false;
 					user.wait_duration = 0;
 				}
